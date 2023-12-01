@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 pom.xml
 pom.xml.asc
 *.jar
@@ -12,3 +13,7 @@ pom.xml.asc
 .lein-failures
 .nrepl-port
 .cpcache/
+=======
+.clj-kondo/
+.lsp/
+>>>>>>> 06fdd0b (feat(day01): implement trebuchet)
