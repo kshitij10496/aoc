@@ -54,11 +54,36 @@ humidity-to-location map:
        (map #(get-nth-item items %))
        (vec)))
 
+(defn build-seed-seq [seed]
+  (let [start (get seed :start)
+        range-length (get seed :range-length)]
+    ;; (println start range-length)
+    (range start (+ start range-length))))
+
+(defn parse-seed-ranges [s]
+  (for [idx (range (count s))]
+    (if (even? idx) 
+      {:start (nth s idx)
+       :range-length (nth s (inc idx))})))
+
+;; (defn parse-seeds [text]
+;;   (let [lines (clojure.string/split-lines text) 
+;;         matcher #"seeds: (.*)"
+;;         m (re-matches matcher (first lines))] 
+;;     (build-seed-seq (parse-seed-ranges (map #(Long/parseLong %) (clojure.string/split (get m 1) #" "))))))
+
 (defn parse-seeds [text]
-  (let [lines (clojure.string/split-lines text) 
+  (let [lines (clojure.string/split-lines text)
         matcher #"seeds: (.*)"
-        m (re-matches matcher (first lines))] 
-    (vec (map #(Long/parseLong %) (clojure.string/split (get m 1) #" ")))))
+        m (re-matches matcher (first lines))
+        seed-vals (->> (clojure.string/split (get m 1) #" ")
+               (filter #(not (clojure.string/blank? %)))
+               (map #(Long/parseLong %))) 
+        seed-ranges (parse-seed-ranges seed-vals)]
+    (->> seed-ranges
+         (filter #(not (nil? %)))
+         (map build-seed-seq))))
+
 
 (defn parse-data [line]
   (let [matcher #"(\d+) (\d+) (\d+)"
@@ -92,20 +117,23 @@ humidity-to-location map:
          (map parse-map)
          (filter #(not (empty? (:data %)))))))
 
-(defn process [input]
-  (let [seeds (parse-seeds input)
-        maps (parse-maps input)] 
-    (println seeds maps)
+(defn process-seeds-seq [maps seeds]
     (loop [maps maps
            result seeds]
       (if (empty? maps)
         result
         (let [map (first maps)
               items (get map :data)]
-          (recur (rest maps) (get-items-with-index items result)))))))
+          (recur (rest maps) (get-items-with-index items result))))))
+
 
 (defn engine [input]
-  (apply min (process input)))
+  (let [seeds (parse-seeds input)
+        maps (parse-maps input)] 
+  (reduce min (->> seeds
+       (filter #(not (nil? %)))
+       (map #(process-seeds-seq maps %)) 
+       (map #(apply min %))))))
 
 (defn solve [path]
   (engine (slurp path)))
