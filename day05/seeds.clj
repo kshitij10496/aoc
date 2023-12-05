@@ -36,8 +36,18 @@ humidity-to-location map:
 60 56 37
 56 93 4")
 
-(defn get-nth-item [items n]
-  (if (< n (count items)) (nth items n) n))
+
+(defn contains-idx [i start end]
+  (and (>= i start) (< i (+ start end))))
+
+
+(defn get-nth-item [ranges idx]
+  ;; {:source-start 98 :dest-start 50 :range-length 2}
+  ;; {:source-start 50 :dest-start 52 :range-length 48}
+  (let [range (first (filter #(contains-idx idx (get % :source-start) (get % :range-length)) ranges))]
+    (if (nil? range)
+      idx
+      (+ (get range :dest-start) (- idx (get range :source-start))))))
 
 (defn get-items-with-index [items idxs]
   (->> idxs
@@ -60,24 +70,6 @@ humidity-to-location map:
      :dest-start dest-start
      :range-length range-length}))
 
-(defn build-default-map [i n start]
-  (flatten (conj (vec (range i))
-                 (for [i (range n)] (+ start i)))))
-
-(defn merge-2-maps [a b]
-  (let [v1 (if (> (count a) (count b)) a b)
-        v2 (if (> (count a) (count b)) b a)]
-        (->> v1
-         (map-indexed (fn [i x] [i x]))
-         (map (fn [[i x]] (if (or (>= i (count v2)) (not (= i x)) (nil? (nth v2 i))) x
-                                  (nth v2 i)))))))
-
-(defn merge-maps [& maps]
-  (loop [maps maps
-         result (first maps)]
-    (if (empty? maps)
-      result
-      (recur (rest maps) (merge-2-maps result (first maps))))))
 
 (defn parse-map [text]
   (let [lines (clojure.string/split-lines text)
@@ -88,9 +80,8 @@ humidity-to-location map:
         data (->> (rest lines)
                   (filter #(not (clojure.string/blank? %)))
                   (map parse-data)
-                  (filter #(not (empty? %))) 
-                  (map #(build-default-map (get % :source-start) (get % :range-length) (get % :dest-start)))
-                  (apply merge-maps))]
+                  (filter #(not (empty? %)))
+                  )]
     {:source source
      :dest dest
      :data data }))
@@ -104,6 +95,7 @@ humidity-to-location map:
 (defn process [input]
   (let [seeds (parse-seeds input)
         maps (parse-maps input)] 
+    (println seeds maps)
     (loop [maps maps
            result seeds]
       (if (empty? maps)
