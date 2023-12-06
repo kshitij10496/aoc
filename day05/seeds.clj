@@ -51,7 +51,7 @@ humidity-to-location map:
 
 (defn get-items-with-index [items idxs]
   (->> idxs
-       (map #(get-nth-item items %))
+       (pmap #(get-nth-item items %))
        (vec)))
 
 (defn build-seed-seq [seed]
@@ -66,11 +66,6 @@ humidity-to-location map:
       {:start (nth s idx)
        :range-length (nth s (inc idx))})))
 
-;; (defn parse-seeds [text]
-;;   (let [lines (clojure.string/split-lines text) 
-;;         matcher #"seeds: (.*)"
-;;         m (re-matches matcher (first lines))] 
-;;     (build-seed-seq (parse-seed-ranges (map #(Long/parseLong %) (clojure.string/split (get m 1) #" "))))))
 
 (defn parse-seeds [text]
   (let [lines (clojure.string/split-lines text)
@@ -132,8 +127,8 @@ humidity-to-location map:
         maps (parse-maps input)] 
   (reduce min (->> seeds
        (filter #(not (nil? %)))
-       (map #(process-seeds-seq maps %)) 
-       (map #(apply min %))))))
+       (pmap #(process-seeds-seq maps %)) 
+       (pmap #(apply min %))))))
 
 (defn solve [path]
   (engine (slurp path)))
