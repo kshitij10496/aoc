@@ -1,12 +1,5 @@
-;; cards.clj --- Scratchcards
-(ns cards
+(ns aoc.2023.day07
   (:require [clojure.string]))
-
-(def input "32T3K 765
-T55J5 684
-KK677 28
-KTJJT 220
-QQQJA 483")
 
 (def rank-map {:A 14 :K 13 :Q 12 :J 1 :T 10 :9 9 :8 8 :7 7 :6 6 :5 5 :4 4 :3 3 :2 2})
 
@@ -81,10 +74,16 @@ QQQJA 483")
 (defn accumulate-bids [acc bid] 
     (assoc acc bid (+ (acc bid) 1)))
 
-(defn engine [input]
+(defn solve2 [input]
     (let [hands (parse-input input)
             sorted-hands (sort sort-hands hands)]
       (reduce + (map-indexed (fn [idx val] (* (+ idx 1) val)) (map #(:bid %) sorted-hands)))))
 
-(defn solve [path]
-  (engine (slurp path)))
+(defn main
+    "Main entry point."
+    [path]
+    (if (empty? path)
+        (println "Usage: day07.clj <input-file>") 
+        (do
+          (println "Part 1:" (solve2 (slurp path)))
+          (println "Part 2:" (solve2 (slurp path))))))

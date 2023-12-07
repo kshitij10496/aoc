@@ -1,41 +1,5 @@
-;; seeds.clj --- Scratchcards
-(ns seeds
+(ns aoc.2023.day05  
   (:require [clojure.string]))
-
-(def input "seeds: 79 14 55 13
-
-seed-to-soil map:
-50 98 2
-52 50 48
-
-soil-to-fertilizer map:
-0 15 37
-37 52 2
-39 0 15
-
-fertilizer-to-water map:
-49 53 8
-0 11 42
-42 0 7
-57 7 4
-
-water-to-light map:
-88 18 7
-18 25 70
-
-light-to-temperature map:
-45 77 23
-81 45 19
-68 64 13
-
-temperature-to-humidity map:
-0 69 1
-1 0 69
-
-humidity-to-location map:
-60 56 37
-56 93 4")
-
 
 (defn contains-idx [i start end]
   (and (>= i start) (< i (+ start end))))
@@ -122,7 +86,7 @@ humidity-to-location map:
           (recur (rest maps) (get-items-with-index items result))))))
 
 
-(defn engine [input]
+(defn solve [input]
   (let [seeds (parse-seeds input)
         maps (parse-maps input)] 
   (reduce min (->> seeds
@@ -130,5 +94,9 @@ humidity-to-location map:
        (pmap #(process-seeds-seq maps %)) 
        (pmap #(apply min %))))))
 
-(defn solve [path]
-  (engine (slurp path)))
+(defn main
+    "Main entry point."
+    [path]
+    (if (empty? path)
+        (println "Usage: day05.clj <input-file>") 
+        (println "Part 1:" (solve (slurp path)))))

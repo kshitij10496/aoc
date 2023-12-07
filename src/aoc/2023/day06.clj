@@ -1,5 +1,4 @@
-;; races.clj --- Scratchcards
-(ns races
+(ns aoc.2023.day06
   (:require [clojure.string]))
 
 (defn distance [v t]
@@ -69,4 +68,11 @@ Distance:  9  40  200")
          distance (parse-distances-kern (second input))]
      (engine time distance)))
 
-;; (races/solve2 "day06/input.txt")
+(defn main
+    "Main entry point."
+    [path]
+    (if (empty? path)
+        (println "Usage: day06.clj <input-file>") 
+        (do
+        (println "Part 1:" (solve1 path))
+        (println "Part 2:" (solve2 path)))))

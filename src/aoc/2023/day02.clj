@@ -1,6 +1,5 @@
-;; cubes.clj --- Cubes Conundrum
-
-(require '[clojure.string])
+(ns aoc.2023.day02
+    (:require [clojure.string]))
 
 ;; Parsing logic
 (defn parse-part [part]
@@ -61,3 +60,12 @@
 
 (defn solve2 [path]
   (sum-cube-products (map parse-game (clojure.string/split-lines (slurp path)))))
+
+(defn main
+  "Main entry point."
+  [path]
+  (if (empty? path)
+    (println "Usage: day02.clj <input-file>") 
+    (do
+      (println "Part 1:" (solve1 path))
+      (println "Part 2:" (solve2 path)))))

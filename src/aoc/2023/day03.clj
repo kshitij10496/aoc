@@ -1,18 +1,5 @@
-;; gears.clj --- Gear Ratios
-(ns gears
+(ns aoc.2023.day03
   (:require [clojure.string]))
-
-;; Sample input from the problem statement.
-(def input "467..114..
-...*......
-..35..633.
-......#...
-617*......
-.....+.58.
-..592.....
-......755.
-...$.*....
-.664.598..")
 
 ;; Parsing the input
 (defn build-number-line [i line]
@@ -124,7 +111,7 @@
 
 (defn gear-ratios [nums asterisks]
   ;; Given a collection of numbers and a collection of asterisks, return the product of the gear ratios.
-  (->> (neighbours nums asterisks)
+  (->> (neighbours nums asterisks) 
        (filter #(gear? (second %))) 
        (map second)
        (map #(apply * %))))
@@ -136,3 +123,12 @@
 (defn solve2 [path]
   ;; Solves the second part of the problem.
   (compute-gears-ratios (slurp path)))
+
+(defn main
+    "Main entry point."
+    [path]
+    (if (empty? path)
+        (println "Usage: day03.clj <input-file>") 
+        (do
+        (println "Part 1:" (solve1 path))
+        (println "Part 2:" (solve2 path)))))

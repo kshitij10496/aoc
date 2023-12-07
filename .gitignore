@@ -1,19 +1,16 @@
-<<<<<<< HEAD
+/target
+/classes
+/checkouts
+profiles.clj
 pom.xml
 pom.xml.asc
 *.jar
 *.class
-/lib/
-/classes/
-/target/
-/checkouts/
-.lein-deps-sum
-.lein-repl-history
-.lein-plugins/
-.lein-failures
-.nrepl-port
-.cpcache/
-=======
+/.lein-*
+/.nrepl-port
+/.prepl-port
+.hgignore
+.hg/
+resources/inputs
 .clj-kondo/
 .lsp/
->>>>>>> 06fdd0b (feat(day01): implement trebuchet)
