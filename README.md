@@ -15,3 +15,15 @@ For a given day `n`, the solutions in this library can be used as follows:
 ```shell
 $ lein run -m aoc.2023.day<n>/main "resources/inputs/day<n>.txt"
 ```
+
+## Running tests
+
+Run all the tests using:
+```sh
+$ lein test
+```
+
+Run the tests for a specific day:
+```sh
+$ lein test :only test/aoc/2023/day<n>_test.clj
+```

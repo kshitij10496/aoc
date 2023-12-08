@@ -155,7 +155,6 @@
 (defn rank-hands 
   "Ranks the hands from strongest to weakest." 
   [hands & joker]
-  (println joker)
   (if joker
     (sort compare-hands-with-joker hands)
     (sort compare-hands hands)))
