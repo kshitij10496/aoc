@@ -1,4 +1,5 @@
-(ns aoc.2023.day09)
+(ns aoc.2023.day09
+  (:require [clojure.string :as clojure.string]))
 
 (defn diff
   "Given a sequence of numbers, return a sequence of the differences between the numbers."
