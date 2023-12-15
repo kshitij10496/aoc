@@ -31,36 +31,129 @@
     (is (= 214 (lens/hash-str "pc=6")))
     (is (= 231 (lens/hash-str "ot=7"))))) 
 
-(deftest hash-sequence-test
+(deftest solve1-test
   (testing "Hash of initialization sequence"
-    (is (= 1320 (lens/hash-sequence "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7")))))
+    (is (= 1320 (lens/solve1 "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7")))))
 
 (deftest focusing-power-test
       (testing "Examples"
-        (is (= 1 (lens/focusing-power 0 0 1)))
-        (is (= 4 (lens/focusing-power 0 1 2)))
-        (is (= 28 (lens/focusing-power 3 0 7)))
-        (is (= 40 (lens/focusing-power 3 1 5)))
-        (is (= 72 (lens/focusing-power 3 2 6))))) 
+        (is (= 1 (lens/focusing-power 1 1 1)))
+        (is (= 4 (lens/focusing-power 1 2 2)))
+        (is (= 28 (lens/focusing-power 4 1 7)))
+        (is (= 40 (lens/focusing-power 4 2 5)))
+        (is (= 72 (lens/focusing-power 4 3 6))))) 
 
 (deftest remove-lens-test
-  (testing "Context of the test assertions"
-    (let [box0 (lens/make-box 0 [(lens/make-lens "rn" 1)])]
-      (is (lens/eq-box box0 (lens/remove-lens box0 "cm")))))
-  (testing "some other case"
-    (let [box0 (lens/make-box 0 [(lens/make-lens "rn" 1) (lens/make-lens "cm" 2)])
-          box1 (lens/make-box 1 [(lens/make-lens "qp" 3)])]
-      (is (lens/eq-box (lens/make-box 0 [(lens/make-lens "rn" 1)]) (lens/remove-lens box0 "cm")))
-      (is (lens/eq-box box1 (lens/remove-lens box1 "cm"))))))
+  (testing "Removing non-existing lens from a box"
+    (let [box [(lens/make-lens "rn" 1)]
+          lens (lens/make-lens "cm")
+          res (lens/remove-lens box lens)]
+      (is (= 1 (count res)))
+      (is (lens/contains-lens? res (first box)))
+      ))
+  (testing "Removing the only element from a box"
+    (let [box [(lens/make-lens "qp" 3)]
+          lens (lens/make-lens "qp")]
+      (is (= 0 (count (lens/remove-lens box lens))))))
+  (testing "Removing the first element from a box"
+    (let [box [(lens/make-lens "pc" 4) (lens/make-lens "ot" 9) (lens/make-lens "ab" 5)]
+          lens (lens/make-lens "pc")]
+      (is (= 2 (count (lens/remove-lens box lens)))))))
+
+(deftest update-lens-test
+  (testing "Updating the power of lens in a box"
+    (let [box [(lens/make-lens "rn" 1)]
+          lens (lens/make-lens "rn" 6)
+          res (lens/updated-lens box lens)]
+      (is (= 1 (count res )))
+      (is (= 6 (lens/lens-power (first res))))
+      (is (lens/contains-lens? res lens))))
+  
+  (testing "Updating in a list of lens"
+    (let [box [(lens/make-lens "pc" 4) (lens/make-lens "ot" 9) (lens/make-lens "ab" 5) ]
+          lens (lens/make-lens "ot" 6)
+          res (lens/updated-lens box lens)]
+      (is (= 3 (count res)))
+      (is (= 6 (lens/lens-power (second (lens/updated-lens box lens)))))))
+  
+  (testing "Do not do anything if the lens does not exist in the list"
+    (let [box [(lens/make-lens "pc" 4) (lens/make-lens "ot" 9) (lens/make-lens "ab" 5)]
+          lens (lens/make-lens "rn" 6)
+          res (lens/updated-lens box lens)]
+      (is (= 3 (count res)))
+      (is (not (lens/contains-lens? res lens))))))
 
 (deftest add-lens-test
-  (testing "adding lens to empty box"
-    (is (lens/eq-box (lens/make-box 0 [(lens/make-lens "rn" 1)]) (lens/add-lens (lens/make-box 0 nil) (lens/make-lens "rn" 1)))))
-  
-  (testing "adding lens to existing box"
-    (is (lens/eq-box (lens/make-box 0 [(lens/make-lens "rn" 1) (lens/make-lens "cm" 2)]) (lens/add-lens (lens/make-box 0 [(lens/make-lens "rn" 1)]) (lens/make-lens "cm" 2)))))
-  
-  (testing "updating lens power to existing box"
-    (is (lens/eq-box (lens/make-box 0 [(lens/make-lens "rn" 1) (lens/make-lens "cm" 5)]) (lens/add-lens (lens/make-box 0 [(lens/make-lens "rn" 1) (lens/make-lens "cm" 2)]) (lens/make-lens "cm" 5))))))
+  (testing "adding lens to empty box" 
+      (let [box []
+            lens (lens/make-lens "rn" 6)
+            new-box (lens/add-lens box lens)]
+        (is (= 1 (count new-box ))) 
+        (is (lens/contains-lens? new-box lens))))
 
+  (testing "adding lens to existing box"
+    (let [box [(lens/make-lens "rn" 1)]
+          lens (lens/make-lens "cm" 2)
+          new-box (lens/add-lens box lens)]
+      (is (= 2 (count new-box)))
+      (is (= 2 (lens/lens-power (last new-box))))
+      (is (lens/contains-lens? new-box lens))
+      (is (lens/contains-lens? new-box (first box))))))
+
+
+
+(deftest upsert-lens-test
+  (testing "adding lens to empty box"
+    (let [box []
+          lens (lens/make-lens "rn" 6)
+          new-box (lens/upsert-lens box lens)]
+      (is (= 1 (count new-box)))
+      (is (lens/contains-lens? new-box lens))))
+
+  (testing "adding lens to existing box"
+    (let [box [(lens/make-lens "rn" 1)]
+          lens (lens/make-lens "cm" 2)
+          new-box (lens/upsert-lens box lens)]
+      (is (= 2 (count new-box)))
+      (is (= 1 (lens/lens-power (first new-box))))
+      (is (= 2 (lens/lens-power (last new-box))))
+      (is (lens/contains-lens? new-box lens))
+      (is (lens/contains-lens? new-box (first box))))))
+
+
+(deftest operate-box-test
+  (testing "Adding a new lens"
+    (let [box [] 
+          lens (lens/make-lens "rn" 1) 
+          res [(lens/make-lens "rn" 1)]]
+       (is (= 1 (count (lens/operate-box box lens false))))
+       (is (lens/contains-lens? res lens)))
+    ))
+
+(deftest parse-instruction-test
+  (testing "Upsert instruction"
+    (let [instruction "rn=1"
+          res (lens/parse-instruction instruction)]
+      (is (= "rn" (:label res)))
+      (is (not (:removal? res)))
+      (is (= 1 (:power res)))))
   
+  (testing "Removal instruction"
+    (let [instruction "cm-"
+          res (lens/parse-instruction instruction)]
+      (is (= "cm" (:label res)))
+      (is (:removal? res))
+      (is (= 0 (:power res))))))
+
+(deftest solve2-test
+  (testing "Example"
+    (is (= 1 (lens/solve2 "rn=1")))
+    (is (= 1 (lens/solve2 "rn=1,cm-")))
+    (is (= 7 (lens/solve2 "rn=1,cm-,qp=3")))
+    (is (= 11 (lens/solve2 "rn=1,cm-,qp=3,cm=2")))
+    (is (= 145 (lens/solve2 "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7")))))
+
+(deftest build-instructions-test
+  (testing "example"
+    (is (= 1 (count (lens/build-instructions "rn=1"))))
+    (is (= 2 (count (lens/build-instructions "rn=1,cm-"))))))
