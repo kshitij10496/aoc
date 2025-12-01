@@ -41,18 +41,39 @@ fun applyInstruction(pos: Int, i: Instruction): Result {
     throw IllegalArgumentException("Unknown direction: ${i.direction}")
 }
 
-// getPassword computes the final position after applying a list of instructions starting from startPos.
-// It tracks the number of times the position 0 is visited after each instruction is applied.
+// getPassword computes the number of times the position 0 is visited after each instruction is applied.
 fun getPassword(startPos: Int, instructions: List<Instruction>): Int {
     var pos = startPos
     var zeroCount = 0
 
     for (instruction in instructions) {
-        val res = applyInstruction(pos, instruction)
-        println("Applied instruction $instruction: moved from $pos to ${res.position}")
-        pos = res.position
-        if (res.position == 0) {
-            zeroCount++
+        val result = applyInstruction(pos, instruction)
+        pos = result.position
+        if (pos == 0) {
+            // Increment zero count if position is 0
+            zeroCount += 1
+        }
+    }
+
+    return zeroCount
+}
+
+
+// getPasswordMethodCLICK computes the number of times the position 0 is visited after or
+// during the application of each instruction.
+fun getPasswordMethodCLICK(startPos: Int, instructions: List<Instruction>): Int {
+    var pos = startPos
+    var zeroCount = 0
+
+    for (instruction in instructions) {
+        // We go through each dial movement one step at a time.
+        val delta = if (instruction.direction == "L") -1 else 1
+
+        for (step in 1..instruction.value) {
+            pos = (pos + delta).mod(100)
+            if (pos == 0) {
+                zeroCount += 1
+            }
         }
     }
 
@@ -70,5 +91,6 @@ fun main(args: Array<String>) {
     val instructions = parseInput(input)
 
     // Compute the password starting from position 50.
-    println(getPassword(50, instructions))
+    println("Part 1: ${getPassword(50, instructions)}")
+    println("Part 2: ${getPasswordMethodCLICK(50, instructions)}")
 }
