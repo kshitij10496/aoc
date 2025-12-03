@@ -53,6 +53,8 @@ fun isInvalidIDGeneric(n: Long): Boolean {
 // Function to get all invalid IDs in a given range using the specified invalidation function.
 fun invalidIDs(range: Range, invalidator: (Long) -> Boolean): List<Long> {
     val invalids = mutableListOf<Long>()
+    // Filter through the range and collect invalid IDs.
+    // Reduce the filtered IDs into their sum.
     for (id in range.start..range.end) {
         if (invalidator(id)) {
             invalids.add(id)
@@ -71,7 +73,8 @@ fun main(args: Array<String>) {
     // Parse the input into a list of Ranges.
     val ranges = parseRanges(input)
 
-    // Build a list of all invalid IDs across all ranges.
+    // Map each range to its list of invalid IDs.
+    // Then reduce the lists into their sum.
     val invalidIDs = mutableListOf<Long>()
     for (range in ranges) {
         invalidIDs.addAll(invalidIDs(range, ::isInvalidID))
