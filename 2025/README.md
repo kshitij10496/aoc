@@ -7,7 +7,7 @@ Excuse to teach myself some Kotlin.
 Compile the binary for each day:
 
 ```sh
-kotlinc cmd/day-XX.kt -include-runtime -d bin/day-XX.jar
+kotlinc src/day-XX.kt -include-runtime -d bin/day-XX.jar
 ```
 
 Execute the binary against input:
