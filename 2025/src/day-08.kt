@@ -38,46 +38,52 @@ fun main(args: Array<String>) {
             distances.put(Pair(junctionBoxes[j], junctionBoxes[i]), distance)
         }
     }
+    println("Computed distances between junction boxes.")
 
+    // Order all the possible pairs by distance.
+    val n = junctionBoxes.size * 10
+    val closestPairs = smallestDistancesN(distances, n)
+    println("Found $n closest pairs of junction boxes.")
 
-    // Find the closest 10 pairs of junction boxes.
-    val closestPairs = smallestDistancesN(distances, 1000)
+    val circuits = mutableListOf<Circuit>()
 
-
-    // Process the pairs into circuits
-    var circuits: List<Circuit> = listOf()
-
+    // Connect the closest pair of junction boxes in to the same circuit.
+    // If neither box is in a circuit, create a new circuit.
     for ((box1, box2) in closestPairs) {
-        // If the boxes are already part of the same circuit, do nothing.
         val circuit1 = circuits.find { it.boxes.contains(box1) }
         val circuit2 = circuits.find { it.boxes.contains(box2) }
 
-        if (circuit1 != null && circuit2 != null) {
-            if (circuit1 == circuit2) {
-                continue
-            } else {
-                // Connect the two circuits.
-                val mergedBoxes = circuit1.boxes + circuit2.boxes
-                circuits = circuits.filter { it != circuit1 && it != circuit2 } + Circuit(mergedBoxes)
-            }
-        } else if (circuit1 != null) {
-            // Add box2 to circuit1
+        if (circuit1 == null && circuit2 == null) {
+            // Neither box is in a circuit, create a new circuit.
+            val newCircuit = Circuit(setOf(box1, box2))
+            circuits.add(newCircuit)
+            println("created new circuit: $box1, $box2")
+        } else if (circuit1 != null && circuit2 == null) {
+            // box1 is in a circuit, add box2 to it.
             val updatedBoxes = circuit1.boxes + box2
-            circuits = circuits.filter { it != circuit1 } + Circuit(updatedBoxes)
-        } else if (circuit2 != null) {
-            // Add box1 to circuit2
+            circuits.remove(circuit1)
+            circuits.add(Circuit(updatedBoxes))
+            println("added $box2 to existing circuit with $box1")
+        } else if (circuit1 == null && circuit2 != null) {
+            // box2 is in a circuit, add box1 to it.
             val updatedBoxes = circuit2.boxes + box1
-            circuits = circuits.filter { it != circuit2 } + Circuit(updatedBoxes)
-        } else {
-            // Create a new circuit with both boxes.
-            circuits = circuits + Circuit(setOf(box1, box2))
+            circuits.remove(circuit2)
+            circuits.add(Circuit(updatedBoxes))
+            println("added $box1 to existing circuit with $box2")
+        } else if (circuit1 != null && circuit2 != null && circuit1 != circuit2) {
+            // Both boxes are in different circuits, merge them.
+            val mergedBoxes = circuit1.boxes + circuit2.boxes
+            circuits.remove(circuit1)
+            circuits.remove(circuit2)
+            circuits.add(Circuit(mergedBoxes))
+            println("merged circuits with $box1 and $box2")
         }
-    }
 
-    // Print the size of the 3 largest circuits.
-    val largestCircuits = circuits.sortedByDescending { it.boxes.size }.take(3)
-    for ((index, circuit) in largestCircuits.withIndex()) {
-        println("Circuit ${index + 1} size: ${circuit.boxes.size}")
+        // Exit if all the boxes are connected in to a single circuit.
+        if (circuits.size == 1 && circuits[0].boxes.size == junctionBoxes.size) {
+            println("connection completed: $box1, $box2")
+            break
+        }
     }
 }
 
